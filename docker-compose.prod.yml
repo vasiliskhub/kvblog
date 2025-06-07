@@ -1,0 +1,55 @@
+# docker-compose.prod.yml
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kvblog
+      POSTGRES_PASSWORD: kvblogpw
+      POSTGRES_DB: kvblogdb
+    volumes:
+      - /mnt/HC_Volume_102633339/postgres:/var/lib/postgresql/data
+    ports:
+      - "55432:5432"
+    networks:
+      - kvblog_backend
+
+  api:
+    image: vasiliskhub/kvblog-api:latest
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__KvblogConnectionString=Host=db;Port=5432;Database=kvblogdb;Username=kvblog;Password=kvblogpw
+      - Auth0__KvblogAuthority=${AUTH0_KVBLOGAUTHORITY}
+      - Auth0__KvblogAudience=${AUTH0_KVBLOGAUDIENCE}
+      - Auth0__KvblogDomain=${AUTH0_KVBLOGDOMAIN}
+      - Auth0__KvblogAuthorizationUrl=${AUTH0_KVBLOGAUTHURL}
+      
+      
+    depends_on:
+      - db
+    networks:
+      - kvblog_backend
+
+  client:
+    image: vasiliskhub/kvblog-client-razor:latest
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - KvblogBaseApiUrl=http://api:8080
+      - Auth0__KvblogAudience=${AUTH0_KVBLOGAUDIENCE}
+      - Auth0__KvblogDomain=${AUTH0_KVBLOGDOMAIN}
+      - Auth0__KvblogClientId=${AUTH0_KVBLOGCLIENTID}
+      - Auth0__KvblogClientSecret=${AUTH0_KVBLOGCLIENTSECRET} 
+    volumes:
+      - /mnt/HC_Volume_102633339/uploads:/app/wwwroot/uploads  
+    depends_on:
+      - api
+    networks:
+      - kvblog_backend
+
+networks:
+  kvblog_backend:
+    external: true

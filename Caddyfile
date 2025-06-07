@@ -1,0 +1,9 @@
+www.aiandchill.co.uk {
+  redir https://aiandchill.co.uk{uri}
+}
+
+aiandchill.co.uk {
+  reverse_proxy client:8081 {
+    header_up X-Forwarded-Proto {scheme}
+  }
+}

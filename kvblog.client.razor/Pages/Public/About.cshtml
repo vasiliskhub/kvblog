@@ -1,0 +1,186 @@
+﻿@page
+@model AboutModel
+@{
+    ViewData["Title"] = "About me";
+}
+<!-- CV Theme CSS -->
+<link id="theme-style" rel="stylesheet" href="~/themes/cvpage/assets/css/devresume.css">
+
+<div class="container-big px-3 px-lg-6">
+	<article class="resume-wrapper mx-auto theme-bg-light p-5 mb-5 my-5 shadow-lg">
+
+        <div class="resume-header">
+            <div class="row align-items-center">
+                <div class="resume-title col-12 col-md-6 col-lg-8 col-xl-9">
+                    <h2 class="resume-name mb-0 text-uppercase">Vasilis K</h2>
+                    <div class="resume-tagline mb-3 mb-md-0">Senior Software Engineer</div>
+                </div><!--//resume-title-->
+                <div class="resume-contact col-12 col-md-6 col-lg-4 col-xl-3">
+                    <ul class="list-unstyled mb-0">
+                        @* <li class="mb-2"><i class="fas fa-phone-square fa-fw fa-lg me-2 "></i><a class="resume-link" href="tel:#">01234567890</a></li>
+                        <li class="mb-2"><i class="fas fa-envelope-square fa-fw fa-lg me-2"></i><a class="resume-link" href="mailto:#">vk@outlook.com</a></li> *@
+                        <li class="mb-2"><i class="fas fa-globe fa-fw fa-lg me-2"></i><a class="resume-link" href="#">https://aiandchill.co.uk/</a></li>
+                        <li class="mb-0"><i class="fas fa-map-marker-alt fa-fw fa-lg me-2"></i>Edinburgh</li>
+                    </ul>
+                </div><!--//resume-contact-->
+            </div><!--//row-->
+
+        </div><!--//resume-header-->
+        <hr>
+        <div class="resume-intro py-3">
+            <div class="row align-items-center">
+              @*   <div class="col-12 col-md-3 col-xl-2 text-center">
+                    <img class="resume-profile-image mb-3 mb-md-0 me-md-5  ms-md-0 rounded mx-auto" src="~/themes/cvpage/assets/images/resume-profile.png" alt="image">
+                </div> *@
+
+                <div class="col text-start">
+                    <p class="mb-0">I have studied Business Administration specializing in Management Information Systems (BSc) at Athens University of Economics and Business. My passion for new technologies, programming and problem solving led me to study Computer science (MSc) at University of Piraeus. My current career focus is mostly around backend development of various services and APIs on Azure, full stack side-projects and exploring how to make the most out of AI — for productivity... and my eventual replacement</p>
+                </div><!--//col-->
+            </div>
+        </div><!--//resume-intro-->
+        <hr>
+        <div class="resume-body">
+            <div class="row">
+                <div class="resume-main col-12 col-lg-8 col-xl-9   pe-0   pe-lg-5">
+                    <section class="work-section py-3">
+                        <h3 class="text-uppercase resume-section-heading mb-4">Work Experiences</h3>
+                        <div class="item mb-3">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Senior Software Engineer</h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end"> Craneware plc | Edinburgh | 2020 - Present</div>
+
+                            </div>
+                            <div class="item-content">
+                                <ul class="resume-list">
+                                    <li>Working in the Data Innovations department, responsible for making U.S. healthcare regulatory data available to Craneware products and clients.</li>
+                                    <li>I design, build, and maintain tools and services to ingest, validate, apply business logic to, and expose regulatory datasets via APIs. These datasets are sourced regularly from various external agencies.</li>
+                                    <li>Led the desing and implementation of robust ETL pipelines using Azure Durable Functions, Blob Storage triggers, and Azure SQL, enabling scalable and maintainable ingestion of complex healthcare data.</li>
+                                </ul>
+                            </div>
+                        </div><!--//item-->
+                        <div class="item mb-3">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Software Engineer</h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end">Zonal Retail Data Systems | Edinburgh | 2017 - 2020</div>
+
+                            </div>
+                            <div class="item-content">
+                                <ul class="resume-list">
+                                    <li>Worked within an agile team to deliver web microservices and REST APIs as part of ZONAL’s transformation of its core EPOS software into a fully cloud-based platform.</li>
+                                    <li>Focused on backend development using C# with .NET Core, following a microservices architecture and deploying through CI/CD pipelines in Azure DevOps (YAML).</li>
+                                    <li>Leveraged Docker for containerization and Kubernetes for orchestration and deployment across environments.</li>
+                                </ul>
+                            </div>
+                        </div><!--//item-->
+                        <div class="item mb-3">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Software Engineer</h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end">Cgsoft LTD | Athens | 2014 - 2017</div>
+
+                            </div>
+                            <div class="item-content">
+                                <ul class="resume-list">
+                                    <li>Contributed to a variety of projects involving complex business and application logic, primarily implemented in T-SQL (stored procedures, triggers, functions) across Desktop and Web applications.</li>
+                                    <li>Worked with a wide range of technologies, including: .NET/C# (WebApi2, .NET Core) for backend services, AngularJS 1.5, MVC5, and WebForms for frontend development, WordPress/PHP for CMS-driven sites</li>
+                                     Key projects included:
+                                    <li>Developed the API layer (.NET 4.5 / WebApi2) for Piraeus Bank’s Real Estate web platform, and supported development of the frontend (MVC5) and database layer (T-SQL).</li>
+                                    <li>Designed and built the company’s new website (thesis.net.gr) from scratch using WordPress.</li>
+                                    <li>Created a product order and inquiry app using AngularJS, DevExtreme, and C# WebApi2.</li>
+                                </ul>
+                            </div>
+                        </div><!--//item-->
+                    </section><!--//work-section-->
+
+
+                    <section class="project-section py-3">
+                        <h3 class="text-uppercase resume-section-heading mb-4">Education</h3>
+                        <div class="item mb-3">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Master in Computer Science</h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end">Athens | 2012 - 2014</div>
+
+                            </div>
+                            <div class="item-content">
+                                <p>University of Piraeus</p>
+
+
+                            </div>
+                        </div><!--//item-->
+                        <div class="item">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Master of Education (M.Ed.), Secondary Education and Teaching </h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end">Athens | 2010 - 2012</div>
+
+                            </div>
+                            <div class="item-content">
+                                <p>Athens University of Economics and Business</p>
+                            </div>
+                        </div><!--//item-->
+                        <div class="item">
+                            <div class="item-heading row align-items-center mb-2">
+                                <h4 class="item-title col-12 col-md-6 col-lg-8 mb-2 mb-md-0">Bachelor of Business Administration B.B.A, Management Information Systems</h4>
+                                <div class="item-meta col-12 col-md-6 col-lg-4 text-muted text-start text-md-end">Athens | 2005 - 2010</div>
+
+                            </div>
+                            <div class="item-content">
+                                <p>Athens University of Economics and Business</p>
+
+                            </div>
+                        </div><!--//item-->
+                       
+                    </section><!--//project-section-->
+                </div><!--//resume-main-->
+                <aside class="resume-aside col-12 col-lg-4 col-xl-3 px-lg-4 pb-lg-4">
+                    <section class="skills-section py-3">
+                        <h3 class="text-uppercase resume-section-heading mb-4">Skills</h3>
+                        <div class="item">
+                            <h4 class="item-title">Technical</h4>
+                            <ul class="list-unstyled resume-skills-list">
+                                <li class="mb-2">C#/.NET Core</li>
+                                <li class="mb-2">Relational & NoSQL databases</li>
+                                <li class="mb-2">Cloud development (Azure Apps, Functions, Storage)</li>
+                                <li class="mb-2">CI/CD pipelines (Azure DevOps, Github), Docker containerization</li>
+                                <li class="mb-2">Object-Oriented Design & Clean Architecture</li>
+                                <li class="mb-2">Database schema design and optimization</li>
+                                <li class="mb-2">RESTful API design and implementation</li>
+                            </ul>
+                        </div><!--//item-->
+                        <div class="item">
+                            <h4 class="item-title">Professional</h4>
+                            <ul class="list-unstyled resume-skills-list">
+                                <li class="mb-2">Effective communication</li>
+                                <li class="mb-2">Strong analytical and problem-solving skills</li>
+                            </ul>
+                        </div><!--//item-->
+                    </section><!--//skills-section-->
+
+                    <section class="skills-section py-3">
+                        <h3 class="text-uppercase resume-section-heading mb-4">Languages</h3>
+                        <ul class="list-unstyled resume-lang-list">
+                            <li class="mb-2">Greek <span class="text-muted">(Native)</span></li>
+                            <li>English <span class="text-muted">(Professional)</span></li>
+                        </ul>
+                    </section><!--//certificates-section-->
+                    <section class="skills-section py-3">
+                        <h3 class="text-uppercase resume-section-heading mb-4">Interests</h3>
+                        <ul class="list-unstyled resume-interests-list mb-0">
+                            <li class="mb-2">Cooking & Baking</li>
+                            <li class="mb-2">Fitness and wellbeing</li>
+                            <li class="mb-2">Reading</li>
+                            <li>Travelling</li>
+                        </ul>
+                    </section><!--//certificates-section-->
+
+                </aside><!--//resume-aside-->
+            </div><!--//row-->
+        </div><!--//resume-body-->
+        <hr>
+        <div class="resume-footer text-center">
+            <ul class="resume-social-list list-inline mx-auto mb-0 d-inline-block text-muted">
+                <li class="list-inline-item mb-lg-0 me-3"><a class="resume-link" href="https://github.com/vasiliskhub"><i class="fab fa-github-square fa-2x me-2" data-fa-transform="down-4"></i><span class="d-none d-lg-inline-block text-muted">github</span></a></li>
+                <li class="list-inline-item mb-lg-0 me-3"><a class="resume-link" href="https://www.linkedin.com/in/vasileiosk/"><i class="fab fa-linkedin fa-2x me-2" data-fa-transform="down-4"></i><span class="d-none d-lg-inline-block text-muted">linkedin</span></a></li>
+            </ul>
+        </div><!--//resume-footer-->
+    </article>
+
+</div><!--//container-->

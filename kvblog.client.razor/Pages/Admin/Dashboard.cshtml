@@ -1,0 +1,21 @@
+﻿@page
+@model Kvblog.Client.Razor.Pages.Admin.DashboardModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col">
+    </div>
+    <div class="col-8">
+        <nav class="blog-nav nav nav-justified my-5">
+            <a class="nav-link-next nav-item nav-link rounded" asp-area="" asp-page="/Admin/BlogArticles/AddBlogArticle">Add new<i class="arrow-next fas fa-long-arrow-alt-right"></i></a>
+        </nav>
+
+        <vc:article-list />
+    </div>
+    <div class="col">
+    </div>
+</div>
+
+

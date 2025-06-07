@@ -1,0 +1,15 @@
+﻿@page "/BlogArticles/AddBlogArticle/AddNew"
+@model Kvblog.Client.Razor.Pages.Admin.BlogArticles.AddBlogArticleModel
+@{
+    Layout = "_Layout";
+}
+<div class="row">
+    <div class="col">
+    </div>
+    <div class="col-8">
+        <h1>Add New Blog Article</h1>
+        <partial name="BlogArticleFormPartialView" model="@Model.BlogArticle" />
+    </div>
+    <div class="col">
+    </div>
+</div>

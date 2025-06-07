@@ -1,0 +1,105 @@
+﻿@page
+@model AboutThisModel
+@{
+    ViewData["Title"] = "About This";
+}
+<article class="blog-post px-3 py-5 p-md-5">
+	<div class="container single-col-max-width">
+		<div class="blog-post-body">
+            <h2>🔧 Kvblog: Building My Own AI-Powered Blog CMS</h2>
+            <br />
+            <blockquote>
+                <strong>Kvblog</strong> is a custom-built, full-stack .NET minimal blog CMS — powered by AI tools, running on Docker containers on Hetzner server.
+            </blockquote>
+
+            <h2>🧠 Why Kvblog?</h2>
+            <p>“AI and chill” is running on <strong>Kvblog</strong>, which is my attempt to resurrect my old WordPress blog — this time built from scratch with C#, .NET, and a whole lot of AI assistance.</p>
+            <p>I’d been meaning to do it for ages, but, you know… life, work, and other side projects always got in the way. What changed? I stopped doing everything myself.</p>
+            <p>With <strong>AI tools like Codex and ChatGPT</strong>, I now get to skip the boring stuff that used to eat up my evenings:</p>
+            <ul>
+                <li>Setting up servers 🧱</li>
+                <li>Debugging Docker typos 🐳</li>
+                <li>Fighting CI/CD configs ⚔️</li>
+                <li>Basic code</li>
+            </ul>
+            <p>Now I just offload all that to my AI minions (kinda), and focus on what I actually enjoy.</p>
+
+            <h2>🤖 How AI Fits In</h2>
+            <blockquote>“I know what I want — and my AI minions (kinda) know how to give it to me.”</blockquote>
+            <p>While writing this blog, I literally asked Codex to implement a search endpoint for <code>Kvblog.Api</code>. After a couple of prompts? Done. I’m not aiming for Google-grade performance — I just want working features <em>without the grind</em>.</p>
+            <p>
+                Getting basic functionality built while I’m writing or experimenting elsewhere? That’s the kind of workflow I never want to give up.<br />
+                <strong>AI and chill.</strong> And if one day AI replaces me? Cool — I’ll be baking pizza with humanoid robots.
+            </p>
+
+            <h2>🏗️ Infra Overview</h2>
+            <p>
+                <b>True story:</b> I once spun up a small Azure App Service + SQL Database for a side project. I thought I had everything on the "Free" or "Basic" tiers. A few weeks later, I got hit with a £400 bill. Turned out the SQL instance wasn’t on the cheapest tier like I assumed, and I had accidentally enabled geo-redundancy on something I didn’t even need.
+
+                Microsoft was kind enough to refund it — “one-time courtesy” because I’m such a great customer or whatever — but I learned my lesson.
+
+                Even when you try to be careful, Azure’s pricing complexity is like playing Minesweeper with your wallet. Yes Azure’s great for companies with deep pockets.
+                Kvblog is not that. So Hetzner server and Docker it is...
+            </p>
+            <p>Let’s break down how this thing is built:</p>
+
+            <h3>💻 Hosting: Hetzner FTW</h3>
+            <ul>
+                <li><strong>Provider:</strong> Hetzner Cloud</li>
+                <li><strong>Setup:</strong> Docker + Docker Compose + external SSD volume</li>
+                <li><strong>Cost:</strong> ~<strong>£4/month</strong></li>
+                <li><strong>Bonus:</strong> No weird billing surprises</li>
+            </ul>
+
+            <h3>🐘 Database: PostgreSQL</h3>
+            <ul>
+                <li>Free ✅</li>
+                <li>Open source ✅</li>
+                <li>Works beautifully with EF Core ✅</li>
+            </ul>
+
+            <h3>🔐 Authentication: Auth0</h3>
+            <p>Sure, it’s just a blog. But if someone hijacks the admin panel and starts posting spam in my name, I’d probably cry.</p>
+            <ul>
+                <li>Secure</li>
+                <li>Easy role-based access</li>
+                <li>Great docs and community</li>
+                <li>Already familiar with it</li>
+                <li>Bonus: GPT understands how to work with it too</li>
+            </ul>
+            <p>Yeah, it’s probably overkill for a blog — but a <em>fun</em>, <em>safe</em>, <em>no-regrets</em> kind of overkill.</p>
+
+            <h3>🖼️ Frontend: Razor Pages (for now)</h3>
+            <p>I default to a <strong>Client–API split</strong>. Even though Razor is fine for now, the API is fully ready for a future React or Blazor frontend if I feel like switching things up later.</p>
+            <p>Always good to leave doors open 🔓</p>
+
+            <h3>⚙️ CI/CD: GitHub Actions</h3>
+            <p>Just push the code — and GitHub Actions handles:</p>
+            <ul>
+                <li>Build 🛠️</li>
+                <li>Test ✅</li>
+                <li>Deploy 🚀</li>
+            </ul>
+
+            <h2>🧘‍♂️ Philosophy: Minimal Effort, Maximum Play</h2>
+            <p>I wanted a stack that’s:</p>
+            <ul>
+                <li><strong>Cheap</strong></li>
+                <li><strong>Flexible</strong></li>
+                <li><strong>Low maintenance</strong></li>
+                <li><strong>Fun to tinker with</strong></li>
+            </ul>
+            <p>And most importantly: <strong>Free from the painful boilerplate work I’ve done 100 times before.</strong></p>
+            <p>Kvblog isn’t just a blog — it’s a testbed for AI-assisted workflows, clean architecture, and chill evenings writing code that doesn’t make me want to scream.</p>
+
+            <h2>💬 Final Thoughts</h2>
+            <p>So that’s Kvblog. A tiny .NET CMS project that:</p>
+            <ul>
+                <li>Avoids cloud pricing traps ☁️💸</li>
+                <li>Embraces AI coding tools 🤖</li>
+                <li>Keeps things minimal, clean, and fun ✨</li>
+            </ul>
+            <p>Let me know if you want a deep dive into the codebase, or how I set up the pipeline — or if you're just here to vibe with the idea of blogging <em>and</em> chilling.</p>	
+		</div>
+	</div><!--//container-->
+</article>

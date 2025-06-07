@@ -1,0 +1,61 @@
+﻿@page
+@model IndexModel
+
+<section class="blog-list px-3 py-5 p-md-5">
+    <div class="container single-col-max-width">
+        @if (Model.BlogArticles.Any())
+        {
+            foreach (var article in Model.BlogArticles)
+            {
+                <div class="item mb-5">
+                    <div class="row g-3 g-xl-0">
+                        <div class="col-2 col-xl-3">
+                            <img class="img-fluid post-thumb"
+                                 src="@Model.GetPreviewImage(article.Body)"
+                                 alt="image"
+                                 style="border-radius: 50px;">
+                        </div>
+                        <div class="col">
+                            <h3 class="title mb-1"><a class="text-link" asp-page="/Public/BlogArticle" asp-route-id="@article.Id">@article.Title</a></h3>
+                            <div class="meta mb-1"><span class="date">Published @Model.GetPostedDate(article.DatePosted) by @article.Author</span><span class="time">@Model.GetReadTime(article.Body) min read</span></div>
+                            <div class="intro">@article.Description</div>
+                            <a class="text-link" asp-page="/Public/BlogArticle" asp-route-id="@article.Id">Read more &rarr;</a>
+                        </div><!--//col-->
+                    </div><!--//row-->
+                </div>
+                <!--//item-->
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+        {
+            <div class="py-3">No relevant results found</div>
+        }
+        <nav class="blog-nav nav nav-justified my-5">
+            @if (Model.PagedArticles.HasPrevious)
+            {
+                <a class="nav-link-prev nav-item nav-link rounded-left"
+                   asp-route-pageNumber="@(Model.PagedArticles.PageNumber - 1)"
+                   asp-route-search="@Model.SearchQuery">
+                    <i class="arrow-prev fas fa-long-arrow-alt-left"></i> Previous
+                </a>
+            }
+            @if (Model.PagedArticles.HasNext)
+            {
+                <a class="nav-link-next nav-item nav-link rounded"
+                   asp-route-pageNumber="@(Model.PagedArticles.PageNumber + 1)"
+                   asp-route-search="@Model.SearchQuery">
+                    Next <i class="arrow-next fas fa-long-arrow-alt-right"></i>
+                </a>
+            }
+        </nav>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+

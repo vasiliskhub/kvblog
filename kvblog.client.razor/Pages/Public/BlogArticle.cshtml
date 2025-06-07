@@ -1,0 +1,17 @@
+﻿@page "/Public/BlogArticle/{id:guid}"
+@model Kvblog.Client.Razor.Pages.Public.BlogArticleModel
+@{
+}
+
+<article class="blog-post px-3 py-5 p-md-5">
+	<div class="container single-col-max-width">
+		<header class="blog-post-header">
+			<h2 class="title mb-2">@Model.BlogArticle.Title</h2>
+			<div class="meta mb-3"><span class="date">Published @Model.GetPostedDate(Model.BlogArticle.DatePosted) by @Model.BlogArticle.Author</span><span class="time">@Model.GetReadTime(Model.BlogArticle.Body) min read</span>
+	</div>
+		</header>
+		<div class="blog-post-body">
+			<p>@Html.Raw(Model.BlogArticle.Body)</p>
+		</div>	
+	</div><!--//container-->
+</article>
