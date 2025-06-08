@@ -1,136 +1,163 @@
 using AutoMapper;
 using Kvblog.Api.Db.Entities;
 using Kvblog.Api.Db.Interfaces;
-using Kvblog.Api.Interfaces;
+using Kvblog.Api.Db.Models;
 using Kvblog.Api.Models;
 using Kvblog.Api.Services;
-using Kvblog.Api.Controllers;
-using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
 namespace Kvblog.Api.Tests;
 
 public class BlogServiceTests
 {
-    [Test]
-    public async Task GetArticleByIdAsync_ReturnsMappedArticle()
-    {
-        var id = Guid.NewGuid();
-        var entity = new BlogArticleEntity { Id = id, Title = "t" };
-        var expected = new BlogArticle { Id = id, Title = "t" };
+	private IMapper _mapper;
 
-        var repo = Substitute.For<IBlogArticleRepository>();
-        repo.GetByIdAsync(id).Returns(entity);
-        var mapper = Substitute.For<IMapper>();
-        mapper.Map<BlogArticle>(entity).Returns(expected);
+	[SetUp]
+	public void Setup()
+	{
+		var config = new MapperConfiguration(cfg =>
+		{
+			cfg.AddProfile<BlogArticleMappingProfile>();
+		});
+		_mapper = config.CreateMapper();
+	}
 
-        var service = new BlogService(repo, mapper);
-        var result = await service.GetArticleByIdAsync(id);
+	[Test]
+	public async Task GetArticleByIdAsync_ReturnsMappedArticle()
+	{
+		var id = Guid.NewGuid();
+		var entity = new BlogArticleEntity { Id = id, Title = "t", Body = "b", Description = "d" };
+		var repo = Substitute.For<IBlogArticleRepository>();
+		repo.GetByIdAsync(id).Returns(entity);
 
-        Assert.That(result?.Id, Is.EqualTo(id));
-        Assert.That(result?.Title, Is.EqualTo("t"));
-    }
+		var service = new BlogService(repo, _mapper);
+		var result = await service.GetArticleByIdAsync(id);
 
-    [Test]
-    public async Task CreateArticleAsync_CallsRepository()
-    {
-        var upsert = new BlogArticleUpsert { Title = "t", Body = "b" };
-        var entity = new BlogArticleEntity { Id = Guid.NewGuid() };
-        var repo = Substitute.For<IBlogArticleRepository>();
-        var mapper = Substitute.For<IMapper>();
-        mapper.Map<BlogArticleEntity>(upsert).Returns(entity);
+		Assert.That(result?.Id, Is.EqualTo(id));
+		Assert.That(result?.Title, Is.EqualTo("t"));
+		Assert.That(result?.Body, Is.EqualTo("b"));
+		Assert.That(result?.Description, Is.EqualTo("d"));
+	}
 
-        var service = new BlogService(repo, mapper);
-        await service.CreateArticleAsync(upsert);
+	[Test]
+	public async Task GetAllArticlesAsync_ReturnsPagedResult()
+	{
+		var id = Guid.NewGuid();
+		var entity = new BlogArticleEntity { Id = id, Title = "t", Body = "b", Description = "d" };
+		var pagedDto = new PagedResultDto<BlogArticleEntity>
+		{
+			Items = new List<BlogArticleEntity> { entity },
+			PageNumber = 2,
+			PageSize = 5,
+			TotalCount = 1
+		};
+		var repo = Substitute.For<IBlogArticleRepository>();
+		repo.GetAllAsync(2, 5).Returns(pagedDto);
 
-        await repo.Received(1).AddAsync(entity);
-    }
+		var service = new BlogService(repo, _mapper);
+		var result = await service.GetAllArticlesAsync(2, 5);
 
-    [Test]
-    public async Task UpdateArticleAsync_PreservesExistingValues()
-    {
-        var id = Guid.NewGuid();
-        var existing = new BlogArticleEntity
-        {
-            Id = id,
-            Title = "old",
-            Body = "body",
-            Description = "desc",
-            FeaturedImageUrl = "img",
-            DatePosted = DateTime.UtcNow.AddDays(-1),
-            Author = "author",
-            DateUpdated = DateTime.UtcNow.AddDays(-1)
-        };
+		Assert.That(result.Items.Count, Is.EqualTo(1));
+		Assert.That(result.Items[0].Id, Is.EqualTo(id));
+		Assert.That(result.PageNumber, Is.EqualTo(2));
+		Assert.That(result.PageSize, Is.EqualTo(5));
+		Assert.That(result.TotalCount, Is.EqualTo(1));
+	}
 
-        var repo = Substitute.For<IBlogArticleRepository>();
-        repo.GetByIdAsync(id).Returns(existing);
-        BlogArticleEntity? saved = null;
-        repo.UpdateAsync(Arg.Do<BlogArticleEntity>(e => saved = e)).Returns(Task.CompletedTask);
+	[Test]
+	public async Task SearchArticlesAsync_ReturnsPagedResult()
+	{
+		var id = Guid.NewGuid();
+		var entity = new BlogArticleEntity { Id = id, Title = "search", Body = "b", Description = "d" };
+		var pagedDto = new PagedResultDto<BlogArticleEntity>
+		{
+			Items = new List<BlogArticleEntity> { entity },
+			PageNumber = 1,
+			PageSize = 10,
+			TotalCount = 1
+		};
+		var repo = Substitute.For<IBlogArticleRepository>();
+		repo.SearchAsync("search", 1, 10).Returns(pagedDto);
 
-        var mapper = Substitute.For<IMapper>();
-        mapper.Map<BlogArticleEntity>(Arg.Any<BlogArticleUpsert>()).Returns(ci =>
-        {
-            var up = ci.Arg<BlogArticleUpsert>();
-            return new BlogArticleEntity
-            {
-                Title = up.Title,
-                Description = up.Description,
-                Body = up.Body,
-                FeaturedImageUrl = up.FeaturedImageUrl,
-                DatePosted = up.DatePosted,
-                DateUpdated = up.DateUpdated,
-                Author = up.Author
-            };
-        });
+		var service = new BlogService(repo, _mapper);
+		var result = await service.SearchArticlesAsync("search", 1, 10);
 
-        var service = new BlogService(repo, mapper);
-        var upsert = new BlogArticleUpsert
-        {
-            Title = "new",
-            Description = "desc2",
-            Body = "body2",
-            FeaturedImageUrl = "img2",
-            DatePosted = null,
-            Author = null,
-            DateUpdated = DateTime.UtcNow
-        };
+		Assert.That(result.Items.Count, Is.EqualTo(1));
+		Assert.That(result.Items[0].Title, Is.EqualTo("search"));
+		Assert.That(result.PageNumber, Is.EqualTo(1));
+		Assert.That(result.PageSize, Is.EqualTo(10));
+		Assert.That(result.TotalCount, Is.EqualTo(1));
+	}
 
-        await service.UpdateArticleAsync(id, upsert);
+	[Test]
+	public async Task CreateArticleAsync_CallsRepositoryWithMappedEntity()
+	{
+		var upsert = new BlogArticleUpsert { Title = "t", Body = "b", Description = "d" };
+		var repo = Substitute.For<IBlogArticleRepository>();
 
-        Assert.NotNull(saved);
-        Assert.That(saved!.DatePosted, Is.EqualTo(existing.DatePosted));
-        Assert.That(saved.Author, Is.EqualTo(existing.Author));
-    }
-}
+		var service = new BlogService(repo, _mapper);
+		await service.CreateArticleAsync(upsert);
 
-public class BlogArticleControllerTests
-{
-    [Test]
-    public async Task GetArticleById_ReturnsNotFound_WhenArticleMissing()
-    {
-        var service = Substitute.For<IBlogService>();
-        service.GetArticleByIdAsync(Arg.Any<Guid>()).Returns((BlogArticle?)null);
-        var controller = new BlogArticleController(service);
+		await repo.Received(1).AddAsync(Arg.Is<BlogArticleEntity>(e =>
+			e.Title == "t" && e.Body == "b" && e.Description == "d"));
+	}
 
-        var result = await controller.GetArticleById(Guid.NewGuid());
+	[Test]
+	public async Task UpdateArticleAsync_UpdatesExistingEntity()
+	{
+		var id = Guid.NewGuid();
+		var existing = new BlogArticleEntity
+		{
+			Id = id,
+			Title = "old",
+			Body = "oldbody",
+			Description = "olddesc",
+			DateUpdated = null
+		};
+		var repo = Substitute.For<IBlogArticleRepository>();
+		repo.GetByIdAsync(id).Returns(existing);
 
-        Assert.IsInstanceOf<NotFoundResult>(result.Result);
-    }
+		var upsert = new BlogArticleUpsert
+		{
+			Title = "new",
+			Body = "newbody",
+			Description = "newdesc"
+		};
 
-    [Test]
-    public async Task GetArticleById_ReturnsOk_WithArticle()
-    {
-        var article = new BlogArticle { Id = Guid.NewGuid(), Title = "a" };
-        var service = Substitute.For<IBlogService>();
-        service.GetArticleByIdAsync(article.Id).Returns(article);
-        var controller = new BlogArticleController(service);
+		var service = new BlogService(repo, _mapper);
+		await service.UpdateArticleAsync(id, upsert);
 
-        var result = await controller.GetArticleById(article.Id);
+		Assert.That(existing.Title, Is.EqualTo("new"));
+		Assert.That(existing.Body, Is.EqualTo("newbody"));
+		Assert.That(existing.Description, Is.EqualTo("newdesc"));
+		Assert.That(existing.DateUpdated, Is.Not.Null);
+		await repo.Received(1).UpdateAsync(existing);
+	}
 
-        var ok = result.Result as OkObjectResult;
-        Assert.NotNull(ok);
-        var returned = ok!.Value as BlogArticle;
-        Assert.NotNull(returned);
-        Assert.That(returned!.Id, Is.EqualTo(article.Id));
-    }
+	[Test]
+	public async Task UpdateArticleAsync_DoesNothingIfEntityNotFound()
+	{
+		var id = Guid.NewGuid();
+		var repo = Substitute.For<IBlogArticleRepository>();
+		repo.GetByIdAsync(id).Returns((BlogArticleEntity)null);
+
+		var upsert = new BlogArticleUpsert { Title = "t", Body = "b", Description = "d" };
+		var service = new BlogService(repo, _mapper);
+
+		await service.UpdateArticleAsync(id, upsert);
+
+		await repo.DidNotReceive().UpdateAsync(Arg.Any<BlogArticleEntity>());
+	}
+
+	[Test]
+	public async Task DeleteArticleAsync_CallsRepository()
+	{
+		var id = Guid.NewGuid();
+		var repo = Substitute.For<IBlogArticleRepository>();
+		var service = new BlogService(repo, _mapper);
+
+		await service.DeleteArticleAsync(id);
+
+		await repo.Received(1).DeleteAsync(id);
+	}
 }

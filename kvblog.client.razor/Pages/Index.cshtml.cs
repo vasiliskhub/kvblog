@@ -30,11 +30,11 @@ namespace Kvblog.Client.Razor.Pages
             {
                 if (!string.IsNullOrWhiteSpace(SearchQuery))
                 {
-                    PagedArticles = await _blogArticleService.SearchAsync(SearchQuery, pageNumber, 3);
+                    PagedArticles = await _blogArticleService.SearchAsync(SearchQuery, pageNumber, 4);
                 }
                 else
                 {
-                    PagedArticles = await _blogArticleService.GetAllAsync(pageNumber, 3);
+                    PagedArticles = await _blogArticleService.GetAllAsync(pageNumber, 4);
                 }
 
                 BlogArticles = PagedArticles.Items;
