@@ -1,16 +1,20 @@
+using System.Net;
 using Auth0.AspNetCore.Authentication;
 using Kvblog.Client.Razor.Services;
 using Kvblog.Client.Razor.Utilities;
 using Kvblog.Client.Razor.Utilities.AuthorizationRequirements;
 using Kvblog.Client.Razor.Utilities.AuthPolicies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
 	options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+	options.KnownProxies.Add(IPAddress.Parse("172.18.0.5")); // Caddie's (reverse proxy) IP address in Docker
 });
 
 builder.Services.AddRazorPages(options =>
@@ -30,7 +34,10 @@ builder.Services.AddHttpClient("KvblogApi",
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
   .CreateClient("KvblogApi"));
 builder.Services.AddScoped<IBlogArticleService>(sp =>
-	new BlogArticleService(sp.GetRequiredService<IHttpClientFactory>().CreateClient("KvblogApi")));
+	new BlogArticleService(
+		sp.GetRequiredService<IHttpClientFactory>().CreateClient("KvblogApi"),
+		sp.GetRequiredService<ILogger<BlogArticleService>>()
+	));
 builder.Services.AddSingleton<IAuthorizationHandler, IsAdminHandler>();
 builder.Services
     .AddAuth0WebAppAuthentication(options => {
@@ -42,6 +49,7 @@ builder.Services
     {
         options.Audience = builder.Configuration["Auth0:KvblogAudience"];
     });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("IsAdmin", policy =>
@@ -51,15 +59,15 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-	ForwardedHeaders = ForwardedHeaders.XForwardedProto
-});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

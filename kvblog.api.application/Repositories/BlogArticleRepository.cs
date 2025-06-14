@@ -1,10 +1,9 @@
-﻿using Kvblog.Api.Db.Entities;
-using Kvblog.Api.Db.Interfaces;
+﻿using Kvblog.Api.Application.Dtos;
 using Kvblog.Api.Db;
-using Kvblog.Api.Db.Models;
+using Kvblog.Api.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Kvblog.Api.Db.Repositories
+namespace Kvblog.Api.Application.Repositories
 {
     public class BlogArticleRepository : IBlogArticleRepository
     {
@@ -20,7 +19,12 @@ namespace Kvblog.Api.Db.Repositories
             return await _dbContext.BlogArticles.FirstOrDefaultAsync(e => e.Id == id);
         }
 
-        public async Task<PagedResultDto<BlogArticleEntity>> GetAllAsync(int pageNumber, int pageSize)
+		public async Task<BlogArticleEntity> GetBySlugAsync(string slug)
+		{
+			return await _dbContext.BlogArticles.FirstOrDefaultAsync(e => e.Slug == slug);
+		}
+
+		public async Task<PagedResultDto<BlogArticleEntity>> GetAllAsync(int pageNumber, int pageSize)
         {
             var query = _dbContext.BlogArticles.AsQueryable().OrderByDescending(a => a.DatePosted);
             var totalCount = await query.CountAsync();

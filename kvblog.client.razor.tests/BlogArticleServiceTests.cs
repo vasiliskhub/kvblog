@@ -1,12 +1,10 @@
-using System;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Kvblog.Client.Razor.Services;
 using Kvblog.Client.Razor.ViewModels;
-using NUnit.Framework;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 
 namespace Kvblog.Client.Razor.Tests;
 
@@ -15,6 +13,11 @@ public class BlogArticleServiceTests
 {
 	private HttpClient CreateClientWithHandler(MockHandler handler)
 		=> new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
+	private BlogArticleService CreateService(HttpClient client)
+	{
+		var logger = Substitute.For<ILogger<BlogArticleService>>();
+		return new BlogArticleService(client, logger);
+	}
 
 	[Test]
 	public async Task GetAsync_ReturnsBlogArticle()
@@ -26,9 +29,9 @@ public class BlogArticleServiceTests
 		};
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
-		var result = await service.GetAsync(article.Id);
+		var result = await service.GetByIdAsync(article.Id);
 
 		Assert.That(result?.Id, Is.EqualTo(article.Id));
 		Assert.That(result?.Title, Is.EqualTo("title"));
@@ -50,9 +53,9 @@ public class BlogArticleServiceTests
 		};
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
-		var result = await service.GetAllAsync();
+		var result = await service.GetAllAsync(1,10);
 
 		Assert.That(result.Items.Count, Is.EqualTo(1));
 		Assert.That(result.PageNumber, Is.EqualTo(1));
@@ -76,7 +79,7 @@ public class BlogArticleServiceTests
 		};
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
 		var result = await service.SearchAsync("search");
 
@@ -85,37 +88,19 @@ public class BlogArticleServiceTests
 	}
 
 	[Test]
-	public async Task AddAsync_SendsPostRequest_WithDefaultImage()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.OK);
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
-
-		var article = new BlogArticle { Title = "t", Description = "d", Body = "b", FeaturedImageUrl = null };
-
-		await service.AddAsync(article);
-
-		Assert.That(handler.LastRequest, Is.Not.Null);
-		Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Post));
-		Assert.That(handler.LastRequestBody, Does.Contain("defaultArticle.jpg"));
-	}
-
-	[Test]
 	public async Task UpdateAsync_SendsPutRequest_AndSetsDateUpdated()
 	{
 		var response = new HttpResponseMessage(HttpStatusCode.OK);
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
-		var article = new BlogArticle { Id = Guid.NewGuid(), Title = "t", Description = "d", Body = "b", FeaturedImageUrl = null };
+		var article = new BlogArticle { Id = Guid.NewGuid(), Title = "t", Description = "d", Body = "b" };
 
 		await service.UpdateAsync(article);
 
 		Assert.That(handler.LastRequest, Is.Not.Null);
 		Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Put));
-		Assert.That(handler.LastRequestBody, Does.Contain("defaultArticle.jpg"));
 		Assert.That(article.DateUpdated, Is.Not.Null);
 	}
 
@@ -125,7 +110,7 @@ public class BlogArticleServiceTests
 		var response = new HttpResponseMessage(HttpStatusCode.OK);
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
 		var id = Guid.NewGuid();
 		await service.DeleteAsync(id);
@@ -141,9 +126,9 @@ public class BlogArticleServiceTests
 		var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
 		var handler = new MockHandler(response);
 		var client = CreateClientWithHandler(handler);
-		var service = new BlogArticleService(client);
+		var service = CreateService(client);
 
-		Assert.ThrowsAsync<HttpRequestException>(async () => await service.GetAsync(Guid.NewGuid()));
+		Assert.ThrowsAsync<HttpRequestException>(async () => await service.GetByIdAsync(Guid.NewGuid()));
 	}
 
 	private class MockHandler : HttpMessageHandler

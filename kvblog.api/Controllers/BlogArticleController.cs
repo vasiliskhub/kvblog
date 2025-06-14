@@ -1,12 +1,12 @@
-﻿using Kvblog.Api.Interfaces;
-using Kvblog.Api.Models;
+﻿using Kvblog.Api.Application.Services;
+using Kvblog.Api.Contracts.Requests;
+using Kvblog.Api.Contracts.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kvblog.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
     public class BlogArticleController : ControllerBase
     {
         private readonly IBlogService _blogService;
@@ -16,8 +16,8 @@ namespace Kvblog.Api.Controllers
             _blogService = blogService;
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BlogArticle>> GetArticleById(Guid id)
+        [HttpGet(ApiEndpoints.BlogArticles.GetById)]
+        public async Task<ActionResult<BlogArticleResponse>> GetArticleById([FromRoute] Guid id)
         {
             var article = await _blogService.GetArticleByIdAsync(id);
 
@@ -29,8 +29,21 @@ namespace Kvblog.Api.Controllers
             return Ok(article);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<PagedResult<BlogArticle>>> GetAllArticles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+		[HttpGet(ApiEndpoints.BlogArticles.GetBySlug)]
+		public async Task<ActionResult<BlogArticleResponse>> GetArticleById([FromRoute] string slug)
+		{
+			var article = await _blogService.GetArticleBySlugAsync(slug);
+
+			if (article == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(article);
+		}
+
+		[HttpGet(ApiEndpoints.BlogArticles.GetAll)]
+        public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> GetAllArticles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             var articles = await _blogService.GetAllArticlesAsync(pageNumber, pageSize);
 
@@ -42,8 +55,8 @@ namespace Kvblog.Api.Controllers
             return Ok(articles);
         }
 
-        [HttpGet("search")]
-        public async Task<ActionResult<PagedResult<BlogArticle>>> SearchArticles([FromQuery] string query, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        [HttpGet(ApiEndpoints.BlogArticles.Search)]
+        public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> SearchArticles([FromQuery] string query, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -51,30 +64,32 @@ namespace Kvblog.Api.Controllers
             }
 
             var articles = await _blogService.SearchArticlesAsync(query, pageNumber, pageSize);
+
             return Ok(articles);
         }
 
-		[HttpPost]
+		[HttpPost(ApiEndpoints.BlogArticles.Create)]
         [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> CreateArticle(BlogArticleUpsert article)
+        public async Task<IActionResult> CreateArticle([FromBody] BlogArticleUpsertRequest article)
         {
             await _blogService.CreateArticleAsync(article);
 
-            return Ok();
+			//ToDo : Return the createdataction article's ID or the full article object
+			return Created();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut(ApiEndpoints.BlogArticles.Update)]
         [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> UpdateArticle(Guid id, BlogArticleUpsert article)
+        public async Task<IActionResult> UpdateArticle([FromRoute] Guid id, [FromBody] BlogArticleUpsertRequest article)
         {
             await _blogService.UpdateArticleAsync(id, article);
 
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete(ApiEndpoints.BlogArticles.Delete)]
         [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> DeleteArticle(Guid id)
+        public async Task<IActionResult> DeleteArticle([FromRoute] Guid id)
         {
             var existingArticle = await _blogService.GetArticleByIdAsync(id);
 

@@ -1,4 +1,4 @@
-namespace Kvblog.Api.Db.Models
+namespace Kvblog.Api.Application.Dtos
 {
     public class PagedResultDto<T>
     {

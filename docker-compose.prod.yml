@@ -1,4 +1,3 @@
-# docker-compose.prod.yml
 version: '3.8'
 
 services:
@@ -21,13 +20,12 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
       - ConnectionStrings__KvblogConnectionString=Host=db;Port=5432;Database=kvblogdb;Username=kvblog;Password=kvblogpw
       - Auth0__KvblogAuthority=${AUTH0_KVBLOGAUTHORITY}
       - Auth0__KvblogAudience=${AUTH0_KVBLOGAUDIENCE}
       - Auth0__KvblogDomain=${AUTH0_KVBLOGDOMAIN}
       - Auth0__KvblogAuthorizationUrl=${AUTH0_KVBLOGAUTHURL}
-      
-      
     depends_on:
       - db
     networks:
@@ -47,6 +45,24 @@ services:
       - /mnt/HC_Volume_102633339/uploads:/app/wwwroot/uploads  
     depends_on:
       - api
+    networks:
+      - kvblog_backend
+
+  migrator:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    volumes:
+      - .:/app
+    working_dir: /app/kvblog.api.db
+    entrypoint: >
+      sh -c "
+        dotnet tool install --global dotnet-ef &&
+        export PATH=$PATH:/root/.dotnet/tools &&
+        dotnet ef database update
+      "
+    environment:
+      - ConnectionStrings__KvblogConnectionString=Host=db;Port=5432;Database=kvblogdb;Username=kvblog;Password=kvblogpw
+    depends_on:
+      - db
     networks:
       - kvblog_backend
 

@@ -23,7 +23,7 @@ namespace Kvblog.Client.Razor.Pages.Admin.BlogArticles
 
         public async Task OnGet()
         {
-            BlogArticle = await _blogArticleService.GetAsync(Id);
+            BlogArticle = await _blogArticleService.GetByIdAsync(Id);
         }
 
         public async Task<IActionResult> OnPostEdit()

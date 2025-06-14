@@ -14,8 +14,7 @@ namespace Kvblog.Client.Razor.Pages
 
         public List<BlogArticle> BlogArticles { get; set; } = new();
         public PagedResult<BlogArticle> PagedArticles { get; set; } = new();
-
-        public IndexModel(ILogger<IndexModel> logger, IBlogArticleService blogArticleService)
+		public IndexModel(ILogger<IndexModel> logger, IBlogArticleService blogArticleService)
         {
             _logger = logger;
             _blogArticleService = blogArticleService;

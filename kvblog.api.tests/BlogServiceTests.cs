@@ -1,9 +1,10 @@
 using AutoMapper;
+using Kvblog.Api.Application.Dtos;
+using Kvblog.Api.Application.Mapping;
+using Kvblog.Api.Application.Repositories;
+using Kvblog.Api.Application.Services;
+using Kvblog.Api.Contracts.Requests;
 using Kvblog.Api.Db.Entities;
-using Kvblog.Api.Db.Interfaces;
-using Kvblog.Api.Db.Models;
-using Kvblog.Api.Models;
-using Kvblog.Api.Services;
 using NSubstitute;
 
 namespace Kvblog.Api.Tests;
@@ -92,7 +93,7 @@ public class BlogServiceTests
 	[Test]
 	public async Task CreateArticleAsync_CallsRepositoryWithMappedEntity()
 	{
-		var upsert = new BlogArticleUpsert { Title = "t", Body = "b", Description = "d" };
+		var upsert = new BlogArticleUpsertRequest { Title = "t", Body = "b", Description = "d" };
 		var repo = Substitute.For<IBlogArticleRepository>();
 
 		var service = new BlogService(repo, _mapper);
@@ -117,7 +118,7 @@ public class BlogServiceTests
 		var repo = Substitute.For<IBlogArticleRepository>();
 		repo.GetByIdAsync(id).Returns(existing);
 
-		var upsert = new BlogArticleUpsert
+		var upsert = new BlogArticleUpsertRequest
 		{
 			Title = "new",
 			Body = "newbody",
@@ -141,7 +142,7 @@ public class BlogServiceTests
 		var repo = Substitute.For<IBlogArticleRepository>();
 		repo.GetByIdAsync(id).Returns((BlogArticleEntity)null);
 
-		var upsert = new BlogArticleUpsert { Title = "t", Body = "b", Description = "d" };
+		var upsert = new BlogArticleUpsertRequest { Title = "t", Body = "b", Description = "d" };
 		var service = new BlogService(repo, _mapper);
 
 		await service.UpdateArticleAsync(id, upsert);

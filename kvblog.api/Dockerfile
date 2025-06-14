@@ -3,6 +3,8 @@ WORKDIR /src
 
 # Copy just the project file first
 COPY ["kvblog.api/Kvblog.Api.csproj", "kvblog.api/"]
+COPY ["kvblog.api.application/Kvblog.Api.Application.csproj", "kvblog.api.application/"]
+COPY ["kvblog.api.contracts/Kvblog.Api.Contracts.csproj", "kvblog.api.contracts/"]
 COPY ["kvblog.api.db/Kvblog.Api.Db.csproj", "kvblog.api.db/"]
 RUN dotnet restore "kvblog.api/Kvblog.Api.csproj"
 

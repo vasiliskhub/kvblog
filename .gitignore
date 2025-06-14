@@ -331,3 +331,4 @@ ASALocalRun/
 /kvblog.api/appsettings.Development.json
 /kvblog.client.razor/appsettings.Development.json
 /kvblog.client.razor/wwwroot/uploads
+/kvblog.api.db/appsettings.development.json

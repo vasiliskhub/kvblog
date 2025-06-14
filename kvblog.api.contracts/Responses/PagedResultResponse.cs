@@ -1,6 +1,6 @@
-namespace Kvblog.Api.Models
+namespace Kvblog.Api.Contracts.Responses
 {
-    public class PagedResult<T>
+    public class PagedResultResponse<T>
     {
         public List<T> Items { get; set; } = new();
         public int PageNumber { get; set; }

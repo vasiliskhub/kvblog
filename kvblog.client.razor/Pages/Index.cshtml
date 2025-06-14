@@ -16,10 +16,10 @@
                                  style="border-radius: 50px;">
                         </div>
                         <div class="col">
-                            <h3 class="title mb-1"><a class="text-link" asp-page="/Public/BlogArticle" asp-route-id="@article.Id">@article.Title</a></h3>
+                            <h3 class="title mb-1"><a class="text-link" asp-page="/Public/BlogArticle" asp-route-slug="@article.Slug">@article.Title</a></h3>
                             <div class="meta mb-1"><span class="date">Published @Model.GetPostedDate(article.DatePosted) by @article.Author</span><span class="time">@Model.GetReadTime(article.Body) min read</span></div>
                             <div class="intro">@article.Description</div>
-                            <a class="text-link" asp-page="/Public/BlogArticle" asp-route-id="@article.Id">Read more &rarr;</a>
+                            <a class="text-link" asp-page="/Public/BlogArticle" asp-route-slug="@article.Slug">Read more &rarr;</a>
                         </div><!--//col-->
                     </div><!--//row-->
                 </div>

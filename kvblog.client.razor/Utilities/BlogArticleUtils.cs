@@ -21,7 +21,7 @@ namespace Kvblog.Client.Razor.Utilities
                         return string.Empty;
                 }
 
-                public static int GetReadTime(string? htmlContent)
+        public static int GetReadTime(string? htmlContent)
 		{
 			if (htmlContent == null)
 			{

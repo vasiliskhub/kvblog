@@ -16,14 +16,14 @@ namespace Kvblog.Client.Razor.Pages.Public
 		}
 
 		[FromRoute]
-		public Guid Id { get; set; }
+		public string Slug { get; set; }
 
 		[BindProperty]
 		public BlogArticle BlogArticle { get; set; }
 
 		public async Task OnGet()
         {
-			BlogArticle = await _blogArticleService.GetAsync(Id);
+			BlogArticle = await _blogArticleService.GetBySlugAsync(Slug);
 		}
 
 		public int GetReadTime(string? htmlContent)

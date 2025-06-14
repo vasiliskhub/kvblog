@@ -1,17 +1,19 @@
 using AutoMapper;
-using Kvblog.Api.Db.Interfaces;
-using Kvblog.Api.Db.Repositories;
+using Kvblog.Api.Application.Mapping;
+using Kvblog.Api.Application.Repositories;
+using Kvblog.Api.Application.Services;
 using Kvblog.Api.Db;
-using Kvblog.Api.Interfaces;
-using Kvblog.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+//ToDo Tidy up registrations
 builder.Services.AddSwaggerGen(
               options =>
               {
@@ -47,7 +49,6 @@ builder.Services.AddSwaggerGen(
 var optionsBuilder = new DbContextOptionsBuilder<BlogDbContext>();
 optionsBuilder.UseNpgsql(builder.Configuration["ConnectionStrings:KvblogConnectionString"]);
 await using var dbContext = new BlogDbContext(optionsBuilder.Options);
-await dbContext.Database.MigrateAsync();
 
 builder.Services.AddDbContext<BlogDbContext>(
     dbContextOptions => dbContextOptions.UseNpgsql(
@@ -71,12 +72,13 @@ var config = new MapperConfiguration(cfg =>
 var mapper = config.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
+//ToDo Move thes registrations to Application Layer
 builder.Services.AddScoped<IBlogArticleRepository, BlogArticleRepository>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -106,5 +108,4 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
