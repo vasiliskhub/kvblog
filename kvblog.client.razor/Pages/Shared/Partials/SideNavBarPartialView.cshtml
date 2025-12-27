@@ -22,7 +22,7 @@
                 <li class="nav-item">
                     <a class="nav-link" asp-area="" asp-page="/Public/About"><i class="fas fa-user fa-fw me-2"></i>About Me</a>
                 </li>
-                @if (User.Identity.IsAuthenticated)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
                     if (UserRoleHelper.IsAdmin(User.Claims))
                     {

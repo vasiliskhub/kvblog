@@ -1,29 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
+using System.ComponentModel.DataAnnotations;
 
-namespace Kvblog.Api.Db.Entities
+namespace Kvblog.Api.Db.Entities;
+
+public partial class BlogArticleEntity
 {
-    public partial class BlogArticleEntity
-    {
-        [Required]
-        public Guid Id { get; init; }
-        [Required]
-        [MaxLength(500)]
-        public string Title { get; set; }
-        [MaxLength(5000)]
-        public string Description { get; set; }
-        [Required]
-        public string Body { get; set; }
-		[Required]
-		public DateTime? DatePosted { get; set; }
-		[Required]
-		public DateTime? DateUpdated { get; set; }
-		[MaxLength(500)]
-		[Required]
-		public string? Author { get; set; }
-		[Required]
-		[MaxLength(500)]
-		public string Slug { get; set; }
+    [Required]
+    public Guid Id { get; set; }
+    [Required]
+    [MaxLength(500)]
+    public required string Title { get; set; }
+    [MaxLength(5000)]
+    public required string Description { get; set; }
+    [Required]
+    public required string Body { get; set; }
+    [Required]
+    public DateTime? DatePosted { get; set; }
+    [Required]
+    public DateTime? DateUpdated { get; set; }
+    [MaxLength(500)]
+    [Required]
+    public string? Author { get; set; }
+    [Required]
+    [MaxLength(500)]
+    public required string Slug { get; set; }
 
-	}
 }

@@ -1,3 +1,4 @@
+using Kvblog.Api.Application.Repositories;
 using Kvblog.Api.Db.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,9 +34,11 @@ public class BlogArticleRepositoryTests
 			Id = Guid.NewGuid(),
 			Title = "Test Title",
 			Body = "Test Body",
-			Description = "Test Desc", // Required
-			FeaturedImageUrl = "test.jpg", // Required
-			DatePosted = DateTime.UtcNow
+			Description = "Test Desc",
+			Slug = "test-title",
+			DatePosted = DateTime.UtcNow,
+			DateUpdated = DateTime.UtcNow,
+			Author = "Test Author"
 		};
 
 		await _repository.AddAsync(article);
@@ -53,8 +56,11 @@ public class BlogArticleRepositoryTests
 			Id = Guid.NewGuid(),
 			Title = "Find Me",
 			Body = "Body",
-			Description = "desc", // Required
-			FeaturedImageUrl = "img.jpg" // Required
+			Description = "desc",
+			Slug = "find-me",
+			DatePosted = DateTime.UtcNow,
+			DateUpdated = DateTime.UtcNow,
+			Author = "Test Author"
 		};
 		_dbContext.BlogArticles.Add(article);
 		await _dbContext.SaveChangesAsync();
@@ -76,9 +82,11 @@ public class BlogArticleRepositoryTests
 				Id = Guid.NewGuid(),
 				Title = $"Title {i}",
 				Body = "Body",
-				Description = $"desc {i}", // Required
-				FeaturedImageUrl = $"img{i}.jpg", // Required
-				DatePosted = DateTime.UtcNow.AddDays(-i)
+				Description = $"desc {i}",
+				Slug = $"title-{i}",
+				DatePosted = DateTime.UtcNow.AddDays(-i),
+				DateUpdated = DateTime.UtcNow,
+				Author = "Test Author"
 			});
 		}
 		await _dbContext.SaveChangesAsync();
@@ -100,7 +108,7 @@ public class BlogArticleRepositoryTests
 			Title = "Old Title",
 			Body = "Old Body",
 			Description = "Old Desc",
-			FeaturedImageUrl = "oldimg.jpg",
+			Slug = "old-title",
 			DatePosted = DateTime.UtcNow.AddDays(-5),
 			DateUpdated = DateTime.UtcNow.AddDays(-2),
 			Author = "Old Author"
@@ -110,7 +118,6 @@ public class BlogArticleRepositoryTests
 
 		// Save original values for fields that should not change
 		var originalDescription = article.Description;
-		var originalFeaturedImageUrl = article.FeaturedImageUrl;
 		var originalDatePosted = article.DatePosted;
 		var originalDateUpdated = article.DateUpdated;
 		var originalAuthor = article.Author;
@@ -126,7 +133,6 @@ public class BlogArticleRepositoryTests
 
 		// Check that the rest of the fields stayed the same
 		Assert.That(fromDb.Description, Is.EqualTo(originalDescription));
-		Assert.That(fromDb.FeaturedImageUrl, Is.EqualTo(originalFeaturedImageUrl));
 		Assert.That(fromDb.DatePosted, Is.EqualTo(originalDatePosted));
 		Assert.That(fromDb.DateUpdated, Is.EqualTo(originalDateUpdated));
 		Assert.That(fromDb.Author, Is.EqualTo(originalAuthor));
@@ -140,8 +146,8 @@ public class BlogArticleRepositoryTests
 			Id = Guid.NewGuid(),
 			Title = "To Delete",
 			Body = "Body",
-			Description = "desc", // Required
-			FeaturedImageUrl = "img.jpg" // Required
+			Description = "desc",
+			Slug = "to-delete"
 		};
 		_dbContext.BlogArticles.Add(article);
 		await _dbContext.SaveChangesAsync();

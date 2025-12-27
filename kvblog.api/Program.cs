@@ -3,6 +3,7 @@ using Kvblog.Api.Application.Mapping;
 using Kvblog.Api.Application.Repositories;
 using Kvblog.Api.Application.Services;
 using Kvblog.Api.Db;
+using Kvblog.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -27,7 +28,7 @@ builder.Services.AddSwaggerGen(
                       {
                           Implicit = new OpenApiOAuthFlow
                           {
-                              AuthorizationUrl = new Uri(builder.Configuration["Auth0:KvblogAuthorizationUrl"], UriKind.Absolute),
+                              AuthorizationUrl = new Uri(builder.Configuration["Auth0:KvblogAuthorizationUrl"] ?? throw new InvalidOperationException("Auth0:KvblogAuthorizationUrl configuration is missing"), UriKind.Absolute),
                               Scopes = new Dictionary<string, string>
                               {
                               }
@@ -41,7 +42,7 @@ builder.Services.AddSwaggerGen(
                           {
                               Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
                           }
-                          ,new string[] {}
+                          ,Array.Empty<string>()
                       }
                   });
               });
@@ -60,15 +61,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Authority = builder.Configuration["Auth0:KvblogAuthority"];
         options.Audience = builder.Configuration["Auth0:KvblogAudience"];
     });
-builder.Services.AddAuthorization(options =>
-{
-	options.AddPolicy("CUDAccess", policy => policy.RequireClaim("permissions", "kvblog:cud"));
-});
+builder.Services.AddAuthorization(options => options.AddPolicy("CUDAccess", policy => policy.RequireClaim("permissions", "kvblog:cud")));
 
-var config = new MapperConfiguration(cfg =>
-{
-    cfg.AddProfile<BlogArticleMappingProfile>();
-});
+var config = new MapperConfiguration(cfg => cfg.AddProfile<BlogArticleMappingProfile>());
 var mapper = config.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
@@ -78,34 +73,18 @@ builder.Services.AddScoped<IBlogService, BlogService>();
 
 var app = builder.Build();
 
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-else
-{
-    app.UseExceptionHandler(appBuilder =>
-    {
-        appBuilder.Run(async context =>
-        {
-            context.Response.StatusCode = 500;
-            await context.Response.WriteAsync(
-                "An unexpected fault happened. Try again later.");
-        });
-    });
-}
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kvblog Api V1");
     c.OAuthClientId(builder.Configuration["Auth0:KvblogApiClientId"]);
-    c.OAuthAdditionalQueryStringParams(new Dictionary<string, string> { { "audience", builder.Configuration["Auth0:KvblogAudience"] } });
+    c.OAuthAdditionalQueryStringParams(new Dictionary<string, string> { { "audience", builder.Configuration["Auth0:KvblogAudience"] ?? throw new InvalidOperationException("Auth0:KvblogAudience configuration is missing") } });
 });
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.Run();
+await app.RunAsync();

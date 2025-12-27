@@ -1,18 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Kvblog.Client.Razor.Pages
+namespace Kvblog.Client.Razor.Pages;
+
+public class AboutThisModel : PageModel
 {
-    public class AboutThisModel : PageModel
+    private readonly ILogger<AboutThisModel> _logger;
+
+    public AboutThisModel(ILogger<AboutThisModel> logger)
     {
-        private readonly ILogger<AboutThisModel> _logger;
+        _logger = logger;
+    }
 
-        public AboutThisModel(ILogger<AboutThisModel> logger)
-        {
-            _logger = logger;
-        }
-
-        public void OnGet()
-        {
-        }
+    public void OnGet()
+    {
     }
 }

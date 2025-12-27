@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Suppress MSB3277 warnings about assembly version conflicts -->
+    <!-- These are harmless transitive dependency conflicts that .NET resolves automatically -->
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+</Project>

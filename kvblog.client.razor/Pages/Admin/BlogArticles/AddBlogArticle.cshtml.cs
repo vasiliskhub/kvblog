@@ -4,37 +4,46 @@ using Kvblog.Client.Razor.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Kvblog.Client.Razor.Pages.Admin.BlogArticles
+namespace Kvblog.Client.Razor.Pages.Admin.BlogArticles;
+
+public class AddBlogArticleModel : PageModel
 {
-    public class AddBlogArticleModel : PageModel
+    private readonly IBlogArticleService _blogArticleService;
+
+    public AddBlogArticleModel(IBlogArticleService blogArticleService,
+       IWebHostEnvironment environment)
     {
-        private IBlogArticleService _blogArticleService;
+        _blogArticleService = blogArticleService;
+    }
 
-        public AddBlogArticleModel(IBlogArticleService blogArticleService,
-           IWebHostEnvironment environment)
+    [BindProperty]
+    public BlogArticle BlogArticle { get; set; } = new();
+
+    public void OnGet()
+    {
+        BlogArticle = new BlogArticle();
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        if (!ModelState.IsValid)
+        { return Page(); }
+
+        BlogArticle.DatePosted = DateTime.UtcNow;
+        BlogArticle.DateUpdated = DateTime.UtcNow;
+        BlogArticle.Author = UserRoleHelper.GetUsername(User.Claims);
+
+        var result = await _blogArticleService.AddAsync(BlogArticle);
+
+        if (result.IsSuccess)
         {
-            _blogArticleService = blogArticleService;
-        }
-
-        [BindProperty]
-        public BlogArticle BlogArticle { get; set; }
-
-        public void OnGet()
-        {
-            BlogArticle = new BlogArticle();
-        }
-
-        public async Task<IActionResult> OnPost()
-        {
-            if (!ModelState.IsValid) { return Page(); }
-
-            BlogArticle.DatePosted = DateTime.UtcNow;
-            BlogArticle.DateUpdated = DateTime.UtcNow;
-            BlogArticle.Author = UserRoleHelper.GetUsername(User.Claims);
-
-            await _blogArticleService.AddAsync(BlogArticle);
-
+            TempData["SuccessMessage"] = "Blog article created successfully";
             return RedirectToPage("/Admin/Dashboard");
+        }
+        else
+        {
+            TempData["ErrorMessage"] = result.ErrorMessage;
+            return Page();
         }
     }
 }

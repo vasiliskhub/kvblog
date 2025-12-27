@@ -1,21 +1,27 @@
-﻿using Kvblog.Client.Razor.Services;
+using Kvblog.Client.Razor.Services;
+using Kvblog.Client.Razor.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kvblog.Client.Razor.Pages.Components.ArticleList
+namespace Kvblog.Client.Razor.Pages.Components.ArticleList;
+
+public class AdminArticleListViewComponent : ViewComponent
 {
-    public class AdminArticleListViewComponent : ViewComponent
+    private readonly IBlogArticleService _blogArticleService;
+
+    public AdminArticleListViewComponent(IBlogArticleService blogArticleService)
     {
-        private IBlogArticleService _blogArticleService;
+        _blogArticleService = blogArticleService;
+    }
 
-        public AdminArticleListViewComponent(IBlogArticleService blogArticleService)
+    public async Task<IViewComponentResult> InvokeAsync()
+    {
+        var result = await _blogArticleService.GetAllAsync(1, int.MaxValue);
+
+        if (result.IsSuccess)
         {
-            _blogArticleService = blogArticleService;
+            return View(result.Value!.Items);
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
-        {
-            var result = await _blogArticleService.GetAllAsync(1, int.MaxValue);
-            return View(result.Items);
-        }
+        return View(new List<BlogArticle>());
     }
 }

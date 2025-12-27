@@ -1,106 +1,85 @@
-﻿using Kvblog.Api.Application.Services;
+using Kvblog.Api.Application.Services;
 using Kvblog.Api.Contracts.Requests;
 using Kvblog.Api.Contracts.Responses;
+using Kvblog.Api.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kvblog.Api.Controllers
+namespace Kvblog.Api.Controllers;
+
+[ApiController]
+public class BlogArticleController : ControllerBase
 {
-    [ApiController]
-    public class BlogArticleController : ControllerBase
+    private readonly IBlogService _blogService;
+
+    public BlogArticleController(IBlogService blogService)
     {
-        private readonly IBlogService _blogService;
+        _blogService = blogService;
+    }
 
-        public BlogArticleController(IBlogService blogService)
+    [HttpGet(ApiEndpoints.BlogArticles.GetById)]
+    public async Task<ActionResult<BlogArticleResponse>> GetArticleByIdAsync([FromRoute] Guid id)
+    {
+        return (await _blogService.GetArticleByIdAsync(id)).ToActionResult();
+    }
+
+    [HttpGet(ApiEndpoints.BlogArticles.GetBySlug)]
+    public async Task<ActionResult<BlogArticleResponse>> GetArticleBySlugAsync([FromRoute] string slug)
+    {
+        return (await _blogService.GetArticleBySlugAsync(slug)).ToActionResult();
+    }
+
+    [HttpGet(ApiEndpoints.BlogArticles.GetAll)]
+    public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> GetAllArticlesAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        return (await _blogService.GetAllArticlesAsync(pageNumber, pageSize)).ToActionResult();
+    }
+
+    [HttpGet(ApiEndpoints.BlogArticles.Search)]
+    public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> SearchArticlesAsync([FromQuery] string query, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        if (string.IsNullOrWhiteSpace(query))
         {
-            _blogService = blogService;
-        }
-
-        [HttpGet(ApiEndpoints.BlogArticles.GetById)]
-        public async Task<ActionResult<BlogArticleResponse>> GetArticleById([FromRoute] Guid id)
-        {
-            var article = await _blogService.GetArticleByIdAsync(id);
-
-            if (article == null)
+            return BadRequest(new ProblemDetails
             {
-                return NotFound();
-            }
-
-            return Ok(article);
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = "Search query cannot be empty"
+            });
         }
 
-		[HttpGet(ApiEndpoints.BlogArticles.GetBySlug)]
-		public async Task<ActionResult<BlogArticleResponse>> GetArticleById([FromRoute] string slug)
-		{
-			var article = await _blogService.GetArticleBySlugAsync(slug);
-
-			if (article == null)
-			{
-				return NotFound();
-			}
-
-			return Ok(article);
-		}
-
-		[HttpGet(ApiEndpoints.BlogArticles.GetAll)]
-        public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> GetAllArticles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        if (query.Length > 200)
         {
-            var articles = await _blogService.GetAllArticlesAsync(pageNumber, pageSize);
-
-            if (articles == null || articles.Items.Count == 0)
+            return BadRequest(new ProblemDetails
             {
-                return NotFound();
-            }
-
-            return Ok(articles);
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = "Search query too long"
+            });
         }
 
-        [HttpGet(ApiEndpoints.BlogArticles.Search)]
-        public async Task<ActionResult<PagedResultResponse<BlogArticleResponse>>> SearchArticles([FromQuery] string query, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return BadRequest();
-            }
+        return (await _blogService.SearchArticlesAsync(query, pageNumber, pageSize)).ToActionResult();
+    }
 
-            var articles = await _blogService.SearchArticlesAsync(query, pageNumber, pageSize);
+    [HttpPost(ApiEndpoints.BlogArticles.Create)]
+    [Authorize(Policy = "CUDAccess")]
+    public async Task<IActionResult> CreateArticleAsync([FromBody] BlogArticleUpsertRequest article)
+    {
+        return (await _blogService.CreateArticleAsync(article))
+            .ToCreatedResult(Request, "/api/v1/blogarticles");
+    }
 
-            return Ok(articles);
-        }
+    [HttpPut(ApiEndpoints.BlogArticles.Update)]
+    [Authorize(Policy = "CUDAccess")]
+    public async Task<IActionResult> UpdateArticleAsync([FromRoute] Guid id, [FromBody] BlogArticleUpsertRequest article)
+    {
+        return (await _blogService.UpdateArticleAsync(id, article)).ToActionResult();
+    }
 
-		[HttpPost(ApiEndpoints.BlogArticles.Create)]
-        [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> CreateArticle([FromBody] BlogArticleUpsertRequest article)
-        {
-            await _blogService.CreateArticleAsync(article);
-
-			//ToDo : Return the createdataction article's ID or the full article object
-			return Created();
-        }
-
-        [HttpPut(ApiEndpoints.BlogArticles.Update)]
-        [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> UpdateArticle([FromRoute] Guid id, [FromBody] BlogArticleUpsertRequest article)
-        {
-            await _blogService.UpdateArticleAsync(id, article);
-
-            return NoContent();
-        }
-
-        [HttpDelete(ApiEndpoints.BlogArticles.Delete)]
-        [Authorize(Policy = "CUDAccess")]
-        public async Task<IActionResult> DeleteArticle([FromRoute] Guid id)
-        {
-            var existingArticle = await _blogService.GetArticleByIdAsync(id);
-
-            if (existingArticle == null)
-            {
-                return NotFound();
-            }
-
-            await _blogService.DeleteArticleAsync(id);
-
-            return NoContent();
-        }
+    [HttpDelete(ApiEndpoints.BlogArticles.Delete)]
+    [Authorize(Policy = "CUDAccess")]
+    public async Task<IActionResult> DeleteArticleAsync([FromRoute] Guid id)
+    {
+        return (await _blogService.DeleteArticleAsync(id)).ToActionResult();
     }
 }

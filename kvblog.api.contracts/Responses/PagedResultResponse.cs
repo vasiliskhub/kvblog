@@ -1,13 +1,12 @@
-namespace Kvblog.Api.Contracts.Responses
+namespace Kvblog.Api.Contracts.Responses;
+
+public class PagedResultResponse<T>
 {
-    public class PagedResultResponse<T>
-    {
-        public List<T> Items { get; set; } = new();
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
-        public int TotalCount { get; set; }
-        public int TotalPages => PageSize == 0 ? 0 : (int)Math.Ceiling((double)TotalCount / PageSize);
-        public bool HasPrevious => PageNumber > 1;
-        public bool HasNext => PageNumber < TotalPages;
-    }
+    public List<T> Items { get; set; } = new();
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public int TotalCount { get; set; }
+    public int TotalPages => PageSize == 0 ? 0 : (int)Math.Ceiling((double)TotalCount / PageSize);
+    public bool HasPrevious => PageNumber > 1;
+    public bool HasNext => PageNumber < TotalPages;
 }

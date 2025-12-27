@@ -3,42 +3,70 @@ using Microsoft.AspNetCore.Mvc;
 using Kvblog.Client.Razor.ViewModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Kvblog.Client.Razor.Pages.Admin.BlogArticles
+namespace Kvblog.Client.Razor.Pages.Admin.BlogArticles;
+
+public class EditBlogArticleModel : PageModel
 {
-    public class EditBlogArticleModel : PageModel
+
+    private readonly IBlogArticleService _blogArticleService;
+
+    public EditBlogArticleModel(IBlogArticleService blogArticleService)
     {
+        _blogArticleService = blogArticleService;
+    }
 
-        private IBlogArticleService _blogArticleService;
+    [FromRoute]
+    public Guid Id { get; set; }
 
-        public EditBlogArticleModel(IBlogArticleService blogArticleService)
+    [BindProperty]
+    public BlogArticle BlogArticle { get; set; } = new();
+
+    public async Task OnGet()
+    {
+        var result = await _blogArticleService.GetByIdAsync(Id);
+
+        if (result.IsSuccess)
         {
-            _blogArticleService = blogArticleService;
+            BlogArticle = result.Value!;
         }
-
-        [FromRoute]
-        public Guid Id { get; set; }
-
-        [BindProperty]
-        public BlogArticle BlogArticle { get; set; }
-
-        public async Task OnGet()
+        else
         {
-            BlogArticle = await _blogArticleService.GetByIdAsync(Id);
+            TempData["ErrorMessage"] = result.ErrorMessage;
+            BlogArticle = new BlogArticle();
         }
+    }
 
-        public async Task<IActionResult> OnPostEdit()
+    public async Task<IActionResult> OnPostEdit()
+    {
+        if (!ModelState.IsValid)
+        { return Page(); }
+
+        var result = await _blogArticleService.UpdateAsync(BlogArticle);
+
+        if (result.IsSuccess)
         {
-            if (!ModelState.IsValid) { return Page(); }
-
-            await _blogArticleService.UpdateAsync(BlogArticle);
-
+            TempData["SuccessMessage"] = "Blog article updated successfully";
             return RedirectToPage("/Admin/Dashboard");
         }
-
-        public async Task<IActionResult> OnPostDelete()
+        else
         {
-            await _blogArticleService.DeleteAsync(Id);
+            TempData["ErrorMessage"] = result.ErrorMessage;
+            return Page();
+        }
+    }
 
+    public async Task<IActionResult> OnPostDelete()
+    {
+        var result = await _blogArticleService.DeleteAsync(Id);
+
+        if (result.IsSuccess)
+        {
+            TempData["SuccessMessage"] = "Blog article deleted successfully";
+            return RedirectToPage("/Admin/Dashboard");
+        }
+        else
+        {
+            TempData["ErrorMessage"] = result.ErrorMessage;
             return RedirectToPage("/Admin/Dashboard");
         }
     }

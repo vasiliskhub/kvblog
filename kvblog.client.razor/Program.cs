@@ -5,7 +5,6 @@ using Kvblog.Client.Razor.Utilities;
 using Kvblog.Client.Razor.Utilities.AuthorizationRequirements;
 using Kvblog.Client.Razor.Utilities.AuthPolicies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.HttpOverrides;
 
 
@@ -13,15 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-	options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
-	options.KnownProxies.Add(IPAddress.Parse("172.18.0.5")); // Caddie's (reverse proxy) IP address in Docker
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+    options.KnownProxies.Add(IPAddress.Parse("172.18.0.5")); // Caddie's (reverse proxy) IP address in Docker
 });
 
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizePage("/Account/Logout");
     options.Conventions.AuthorizePage("/Account/Profile");
-    options.Conventions.AuthorizeFolder("/Admin","IsAdmin");
+    options.Conventions.AuthorizeFolder("/Admin", "IsAdmin");
 });
 
 builder.Services.AddControllers();
@@ -29,26 +28,24 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<TokenHandler>();
 builder.Services.AddHttpClient("KvblogApi",
-      client => client.BaseAddress = new Uri(builder.Configuration["KvblogBaseApiUrl"]))
+      client => client.BaseAddress = new Uri(builder.Configuration["KvblogBaseApiUrl"] ?? throw new InvalidOperationException("KvblogBaseApiUrl configuration is missing")))
       .AddHttpMessageHandler<TokenHandler>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
   .CreateClient("KvblogApi"));
 builder.Services.AddScoped<IBlogArticleService>(sp =>
-	new BlogArticleService(
-		sp.GetRequiredService<IHttpClientFactory>().CreateClient("KvblogApi"),
-		sp.GetRequiredService<ILogger<BlogArticleService>>()
-	));
+    new BlogArticleService(
+        sp.GetRequiredService<IHttpClientFactory>().CreateClient("KvblogApi"),
+        sp.GetRequiredService<ILogger<BlogArticleService>>()
+    ));
 builder.Services.AddSingleton<IAuthorizationHandler, IsAdminHandler>();
 builder.Services
-    .AddAuth0WebAppAuthentication(options => {
-        options.Domain = builder.Configuration["Auth0:KvblogDomain"];
-        options.ClientId = builder.Configuration["Auth0:KvblogClientId"];
-        options.ClientSecret = builder.Configuration["Auth0:KvblogClientSecret"];
-        options.Scope = "openid profile email";
-    }).WithAccessToken(options =>
+    .AddAuth0WebAppAuthentication(options =>
     {
-        options.Audience = builder.Configuration["Auth0:KvblogAudience"];
-    });
+        options.Domain = builder.Configuration["Auth0:KvblogDomain"] ?? throw new InvalidOperationException("Auth0:KvblogDomain configuration is missing");
+        options.ClientId = builder.Configuration["Auth0:KvblogClientId"] ?? throw new InvalidOperationException("Auth0:KvblogClientId configuration is missing");
+        options.ClientSecret = builder.Configuration["Auth0:KvblogClientSecret"] ?? throw new InvalidOperationException("Auth0:KvblogClientSecret configuration is missing");
+        options.Scope = "openid profile email";
+    }).WithAccessToken(options => options.Audience = builder.Configuration["Auth0:KvblogAudience"] ?? throw new InvalidOperationException("Auth0:KvblogAudience configuration is missing"));
 
 builder.Services.AddAuthorization(options =>
 {

@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Kvblog.Client.Razor.Pages.Admin
+namespace Kvblog.Client.Razor.Pages.Admin;
+
+public class DashboardModel : PageModel
 {
-    public class DashboardModel : PageModel
+    public void OnGet()
     {
-        public void OnGet()
-        {
-        }
     }
 }

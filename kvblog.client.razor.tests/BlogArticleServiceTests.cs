@@ -11,145 +11,154 @@ namespace Kvblog.Client.Razor.Tests;
 [TestFixture]
 public class BlogArticleServiceTests
 {
-	private HttpClient CreateClientWithHandler(MockHandler handler)
-		=> new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
-	private BlogArticleService CreateService(HttpClient client)
-	{
-		var logger = Substitute.For<ILogger<BlogArticleService>>();
-		return new BlogArticleService(client, logger);
-	}
+    private static HttpClient CreateClientWithHandler(MockHandler handler)
+    {
+        return new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
+    }
 
-	[Test]
-	public async Task GetAsync_ReturnsBlogArticle()
-	{
-		var article = new BlogArticle { Id = Guid.NewGuid(), Title = "title" };
-		var response = new HttpResponseMessage(HttpStatusCode.OK)
-		{
-			Content = new StringContent(JsonSerializer.Serialize(article), Encoding.UTF8, "application/json")
-		};
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+    private static BlogArticleService CreateService(HttpClient client)
+    {
+        var logger = Substitute.For<ILogger<BlogArticleService>>();
+        return new BlogArticleService(client, logger);
+    }
 
-		var result = await service.GetByIdAsync(article.Id);
+    [Test]
+    public async Task GetAsync_ReturnsBlogArticle()
+    {
+        var article = new BlogArticle { Id = Guid.NewGuid(), Title = "title" };
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(article), Encoding.UTF8, "application/json")
+        };
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-		Assert.That(result?.Id, Is.EqualTo(article.Id));
-		Assert.That(result?.Title, Is.EqualTo("title"));
-	}
+        var result = await service.GetByIdAsync(article.Id);
 
-	[Test]
-	public async Task GetAllAsync_ReturnsPagedResult()
-	{
-		var paged = new PagedResult<BlogArticle>
-		{
-			Items = new() { new BlogArticle { Id = Guid.NewGuid(), Title = "t" } },
-			PageNumber = 1,
-			PageSize = 4,
-			TotalCount = 1
-		};
-		var response = new HttpResponseMessage(HttpStatusCode.OK)
-		{
-			Content = new StringContent(JsonSerializer.Serialize(paged), Encoding.UTF8, "application/json")
-		};
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value?.Id, Is.EqualTo(article.Id));
+        Assert.That(result.Value?.Title, Is.EqualTo("title"));
+    }
 
-		var result = await service.GetAllAsync(1,10);
+    [Test]
+    public async Task GetAllAsync_ReturnsPagedResult()
+    {
+        var paged = new PagedResult<BlogArticle>
+        {
+            Items = new() { new BlogArticle { Id = Guid.NewGuid(), Title = "t" } },
+            PageNumber = 1,
+            PageSize = 4,
+            TotalCount = 1
+        };
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(paged), Encoding.UTF8, "application/json")
+        };
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-		Assert.That(result.Items.Count, Is.EqualTo(1));
-		Assert.That(result.PageNumber, Is.EqualTo(1));
-		Assert.That(result.PageSize, Is.EqualTo(4));
-		Assert.That(result.TotalCount, Is.EqualTo(1));
-	}
+        var result = await service.GetAllAsync(1, 10);
 
-	[Test]
-	public async Task SearchAsync_ReturnsPagedResult()
-	{
-		var paged = new PagedResult<BlogArticle>
-		{
-			Items = new() { new BlogArticle { Id = Guid.NewGuid(), Title = "search" } },
-			PageNumber = 1,
-			PageSize = 10,
-			TotalCount = 1
-		};
-		var response = new HttpResponseMessage(HttpStatusCode.OK)
-		{
-			Content = new StringContent(JsonSerializer.Serialize(paged), Encoding.UTF8, "application/json")
-		};
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.Items.Count, Is.EqualTo(1));
+        Assert.That(result.Value.PageNumber, Is.EqualTo(1));
+        Assert.That(result.Value.PageSize, Is.EqualTo(4));
+        Assert.That(result.Value.TotalCount, Is.EqualTo(1));
+    }
 
-		var result = await service.SearchAsync("search");
+    [Test]
+    public async Task SearchAsync_ReturnsPagedResult()
+    {
+        var paged = new PagedResult<BlogArticle>
+        {
+            Items = new() { new BlogArticle { Id = Guid.NewGuid(), Title = "search" } },
+            PageNumber = 1,
+            PageSize = 10,
+            TotalCount = 1
+        };
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(paged), Encoding.UTF8, "application/json")
+        };
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-		Assert.That(result.Items.Count, Is.EqualTo(1));
-		Assert.That(result.Items[0].Title, Is.EqualTo("search"));
-	}
+        var result = await service.SearchAsync("search");
 
-	[Test]
-	public async Task UpdateAsync_SendsPutRequest_AndSetsDateUpdated()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.OK);
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Value.Items.Count, Is.EqualTo(1));
+        Assert.That(result.Value.Items[0].Title, Is.EqualTo("search"));
+    }
 
-		var article = new BlogArticle { Id = Guid.NewGuid(), Title = "t", Description = "d", Body = "b" };
+    [Test]
+    public async Task UpdateAsync_SendsPutRequest_AndSetsDateUpdated()
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-		await service.UpdateAsync(article);
+        var article = new BlogArticle { Id = Guid.NewGuid(), Title = "t", Description = "d", Body = "b" };
 
-		Assert.That(handler.LastRequest, Is.Not.Null);
-		Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Put));
-		Assert.That(article.DateUpdated, Is.Not.Null);
-	}
+        await service.UpdateAsync(article);
 
-	[Test]
-	public async Task DeleteAsync_SendsDeleteRequest()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.OK);
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+        Assert.That(handler.LastRequest, Is.Not.Null);
+        Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Put));
+        Assert.That(article.DateUpdated, Is.Not.Null);
+    }
 
-		var id = Guid.NewGuid();
-		await service.DeleteAsync(id);
+    [Test]
+    public async Task DeleteAsync_SendsDeleteRequest()
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-		Assert.That(handler.LastRequest, Is.Not.Null);
-		Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Delete));
-		Assert.That(handler.LastRequest.RequestUri.ToString(), Does.Contain(id.ToString()));
-	}
+        var id = Guid.NewGuid();
+        await service.DeleteAsync(id);
 
-	[Test]
-	public void GetAsync_ThrowsOnError()
-	{
-		var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-		var handler = new MockHandler(response);
-		var client = CreateClientWithHandler(handler);
-		var service = CreateService(client);
+        Assert.That(handler.LastRequest, Is.Not.Null);
+        Assert.That(handler.LastRequest.Method, Is.EqualTo(HttpMethod.Delete));
+        Assert.That(handler.LastRequest.RequestUri?.ToString(), Does.Contain(id.ToString()));
+    }
 
-		Assert.ThrowsAsync<HttpRequestException>(async () => await service.GetByIdAsync(Guid.NewGuid()));
-	}
+    [Test]
+    public async Task GetAsync_ReturnsFailureOnError()
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        using var handler = new MockHandler(response);
+        using var client = CreateClientWithHandler(handler);
+        var service = CreateService(client);
 
-	private class MockHandler : HttpMessageHandler
-	{
-		public HttpRequestMessage? LastRequest { get; private set; }
-		public string? LastRequestBody { get; private set; }
-		private readonly HttpResponseMessage _response;
+        var result = await service.GetByIdAsync(Guid.NewGuid());
 
-		public MockHandler(HttpResponseMessage response)
-		{
-			_response = response;
-		}
+        Assert.That(result.IsSuccess, Is.False);
+        Assert.That(result.ErrorMessage, Is.Not.Null);
+    }
 
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-		{
-			LastRequest = request;
-			if (request.Content != null)
-			{
-				LastRequestBody = await request.Content.ReadAsStringAsync();
-			}
-			return _response;
-		}
-	}
+    private class MockHandler : HttpMessageHandler
+    {
+        public HttpRequestMessage? LastRequest { get; private set; }
+        public string? LastRequestBody { get; private set; }
+        private readonly HttpResponseMessage _response;
+
+        public MockHandler(HttpResponseMessage response)
+        {
+            _response = response;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        {
+            LastRequest = request;
+            if (request.Content != null)
+            {
+                LastRequestBody = await request.Content.ReadAsStringAsync(cancellationToken);
+            }
+            return _response;
+        }
+    }
 }

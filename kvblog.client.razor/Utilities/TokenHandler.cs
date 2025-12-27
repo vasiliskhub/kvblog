@@ -1,24 +1,26 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using System.Net.Http.Headers;
 
-namespace Kvblog.Client.Razor.Utilities
+namespace Kvblog.Client.Razor.Utilities;
+
+public class TokenHandler : DelegatingHandler
 {
-    public class TokenHandler : DelegatingHandler
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public TokenHandler(IHttpContextAccessor httpContextAccessor)
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        public TokenHandler(IHttpContextAccessor httpContextAccessor)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var context = _httpContextAccessor.HttpContext;
+        if (context != null)
         {
-            _httpContextAccessor = httpContextAccessor;
+            var accessToken = await context.GetTokenAsync("access_token");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
-
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
-            return await base.SendAsync(request, cancellationToken);
-        }
+        return await base.SendAsync(request, cancellationToken);
     }
 }

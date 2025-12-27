@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:16
@@ -37,10 +35,10 @@ services:
       - api
 
   migrator:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
+    image: mcr.microsoft.com/dotnet/sdk:10.0
     volumes:
       - .:/app
-    working_dir: /app/Kvblog.Api.Db
+    working_dir: /app/kvblog.api.db
     entrypoint: /bin/bash /app/scripts/run-local-docker-migrations.sh
     environment:
       - ConnectionStrings__KVBlogConnectionString=Host=db;Port=5432;Database=kvblogdb;Username=kvblog;Password=kvblogpw

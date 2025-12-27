@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
-namespace Kvblog.Client.Razor.Utilities.AuthorizationRequirements
+namespace Kvblog.Client.Razor.Utilities.AuthorizationRequirements;
+
+public class IsAdminRequirement : IAuthorizationRequirement
 {
-    public class IsAdminRequirement : IAuthorizationRequirement
-    {
-    }
 }
